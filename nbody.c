@@ -35,7 +35,7 @@ void calc_force(Particle *p, float dt, int n) {
       Fx += dx * invDist3; Fy += dy * invDist3; Fz += dz * invDist3;
     }
     /* update instantaneous velocity based on force and timestep */
-    p[i].vx = dt*Fx; p[i].vy = dt*Fy; p[i].vz = dt*Fz;
+    p[i].vx += dt*Fx; p[i].vy += dt*Fy; p[i].vz += dt*Fz;
   }
 }
 

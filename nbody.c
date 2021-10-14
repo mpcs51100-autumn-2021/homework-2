@@ -20,19 +20,21 @@ void ran_init(float *data, int n) {
 
 /* calculate all interparticle forces and update instantaneous velocities */
 void calc_force(Particle *p, float dt, int n) {
-  for (int i = 0; i < n; i++) { 
+  for (int i = 0; i < n; i++) {
     float Fx = 0.0f; float Fy = 0.0f; float Fz = 0.0f;
 
     for (int j = 0; j < n; j++) {
-      /* calculate net particle for on i'th particle */
-      float dx = p[j].x - p[i].x;
-      float dy = p[j].y - p[i].y;
-      float dz = p[j].z - p[i].z;
-      float distSqr = dx*dx + dy*dy + dz*dz + SOFTENING;
-      float invDist = 1.0f / sqrtf(distSqr);
-      float invDist3 = invDist * invDist * invDist;
+      /* calculate net particle force on i'th particle */
+      if (j != i) {
+        float dx = p[j].x - p[i].x;
+        float dy = p[j].y - p[i].y;
+        float dz = p[j].z - p[i].z;
+        float distSqr = dx*dx + dy*dy + dz*dz + SOFTENING;
+        float invDist = 1.0f / sqrtf(distSqr);
+        float invDist3 = invDist * invDist * invDist;
 
-      Fx += dx * invDist3; Fy += dy * invDist3; Fz += dz * invDist3;
+        Fx += dx * invDist3; Fy += dy * invDist3; Fz += dz * invDist3;
+      }
     }
     /* update instantaneous velocity based on force and timestep */
     p[i].vx += dt*Fx; p[i].vy += dt*Fy; p[i].vz += dt*Fz;
@@ -64,10 +66,10 @@ int main(const int argc, const char** argv) {
   /* ------------------------------*/
   for (int iter = 1; iter <= nIters; iter++) {
     printf("iteration:%d\n", iter);
-    
+
     for (int i = 0;i < nParticles; ++i)
       fprintf(datafile, "%f %f %f \n", p[i].x, p[i].y, p[i].z);
-    
+
     StartTimer();
 
     calc_force(p, dt, nParticles);           /* compute interparticle forces and update vel */
@@ -80,12 +82,12 @@ int main(const int argc, const char** argv) {
 
     const double tElapsed = GetTimer() / 1000.0;
     if (iter > 1) {                          /* First iter is warm up */
-      totalTime += tElapsed; 
+      totalTime += tElapsed;
     }
   }
-  
+
   fclose(datafile);
-  double avgTime = totalTime / (double)(nIters-1); 
+  double avgTime = totalTime / (double)(nIters-1);
 
   printf("avgTime: %f   totTime: %f \n", avgTime, totalTime);
   free(buf);
